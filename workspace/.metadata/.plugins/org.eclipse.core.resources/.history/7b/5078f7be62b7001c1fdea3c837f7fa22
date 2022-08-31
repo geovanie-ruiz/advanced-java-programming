@@ -1,0 +1,104 @@
+package cop2805;
+
+import java.net.*;
+import java.io.*;
+import java.nio.charset.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * @author Geovanie Ruiz
+ *
+ */
+
+class WordSearcher {
+	Integer lineCount = 0;
+	List<String> fileCache = null;
+	
+	public WordSearcher(String filename) {
+		fileCache = ReadFile(filename);
+		lineCount = fileCache.size();
+	}
+
+	public List<Integer> Search(String word) {
+		word = word.toUpperCase();
+		
+		List<Integer> matchIndex = new ArrayList<Integer>();
+		
+		for (int i = 0; i < lineCount; i++) {
+			
+		}
+	}
+
+	private List<String> ReadFile(String file) {
+		List<String> readLines = null;
+
+		try {
+			readLines = Files.readAllLines(Paths.get(file));
+			readLines.replaceAll(String::toUpperCase);
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+
+		return readLines;
+	}
+}
+
+public class SearchServer {
+	private static WordSearcher searcher = null;
+	
+	private static void boot() {
+		searcher = new WordSearcher("hamlet.txt");
+	}
+	
+	public static void main(String[] args) {
+		boolean shutdown = false;
+		ServerSocket server = null;
+		
+		try {
+			server = new ServerSocket(1236);
+			System.out.println("Port #1236 bound. Accepting connections.");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+		while (!shutdown) {
+			Socket client = null;
+			InputStream input = null;
+			OutputStream output = null;
+			
+			try {
+				client = server.accept();
+				input = client.getInputStream();
+				output = client.getOutputStream();
+				
+				int length = input.read();
+				byte[] data = new byte[length];
+				
+				input.read(data);
+				
+				String clientInput = new String(data, StandardCharsets.UTF_8);
+				clientInput.replace("\n", "");
+				System.out.println("Client said: " + clientInput);
+				
+				String response = "Your input was [" + clientInput + "]";
+				output.write(response.length());
+				output.write(response.getBytes());
+				
+				client.close();
+				
+				if(clientInput.equalsIgnoreCase("shutdown")) {
+					System.out.println("Shutting down...");
+					shutdown = true;
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				continue;
+			}
+		}
+	}
+}

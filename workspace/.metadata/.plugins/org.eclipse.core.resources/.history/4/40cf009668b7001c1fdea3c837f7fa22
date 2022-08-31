@@ -1,0 +1,47 @@
+package cop2805;
+
+import java.net.*;
+import java.io.*;
+import java.nio.charset.*;
+import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * @author Geovanie Ruiz
+ *
+ */
+public class SearchClient {
+
+	public static void main(String[] args) {
+		System.out.print("Input a string: ");
+		BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+
+		try {
+			String userString = userInput.readLine();
+
+			Socket connection = new Socket("127.0.0.1", 1236);
+			
+			InputStream is = connection.getInputStream();
+			ObjectInputStream input = new ObjectInputStream(is);
+			OutputStream output = connection.getOutputStream();
+			
+			output.write(userString.length());
+			output.write(userString.getBytes());
+
+			List<Integer> serverResponse = new ArrayList<Integer>();
+			try {
+				serverResponse = (List<Integer>)input.readObject();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			System.out.println(serverResponse);
+			
+			if(!connection.isClosed()) {
+				connection.close();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}

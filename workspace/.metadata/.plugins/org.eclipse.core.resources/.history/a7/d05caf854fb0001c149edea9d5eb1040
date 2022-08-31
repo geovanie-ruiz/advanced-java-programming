@@ -1,0 +1,73 @@
+package cop2805;
+
+/**
+ * @author Geovanie Ruiz
+ *
+ */
+
+class Recursionacci extends Thread {
+	private int n;
+	
+	public Recursionacci(int n) {
+		this.n = n;
+	}
+
+	private long fibonacci (int n) {
+		System.out.format("Recursionacci(fibonacci(%s))\n", n);
+		if (n == 0) {
+			return 0;
+		}
+		if (n == 1) {
+			return 1;
+		}
+		return fibonacci(n-1) + fibonacci(n-2);
+	}
+
+	public void run() {
+		long startTime = System.currentTimeMillis();
+		long seqResult = fibonacci(this.n);
+		long endTime = System.currentTimeMillis();
+		System.out.format("Recursion thread found the answer: %s in %s ms\n", seqResult, endTime - startTime);
+	}
+}
+
+class Dynaminacci extends Thread{
+	private int n;
+	
+	public Dynaminacci(int n) {
+		this.n = n;
+	}
+
+	private long fibonacci () {
+		long n1 = 0;
+		long n2 = 1;
+		long n3 = 0;
+
+		for (int i = 2; i <= this.n; i++) {
+			System.out.format("Dynaminacci(fibonacci(%s))\n", n);
+			n3 = n1 + n2;
+			n1 = n2;
+			n2 = n3;
+		}
+		
+		return n3;
+	}
+	public void run() {
+		long startTime = System.currentTimeMillis();
+		long seqResult = fibonacci(this.n);
+		long endTime = System.currentTimeMillis();
+		System.out.format("Dynamic Programming thread found the answer: %s in %s ms\n", seqResult, endTime - startTime);
+	}
+}
+
+public class Threadonacci {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		int target = 5;
+		(new Recursionacci()).start(target);
+		(new Dynaminacci(5)).start(target);
+	}
+}

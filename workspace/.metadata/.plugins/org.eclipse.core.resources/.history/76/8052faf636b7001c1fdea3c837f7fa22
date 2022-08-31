@@ -1,0 +1,16 @@
+package cop3805;
+
+import java.net.*;
+import java.io.*;
+import java.nio.charset.*;
+
+/**
+ * @author Geovanie Ruiz
+ *
+ */
+public class SearchServer {
+	
+	public static void main(String[] args) {
+		
+	}
+}

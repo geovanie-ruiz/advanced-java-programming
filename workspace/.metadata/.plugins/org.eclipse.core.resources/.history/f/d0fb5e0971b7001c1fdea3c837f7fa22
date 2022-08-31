@@ -1,0 +1,132 @@
+package cop2805;
+
+import java.net.*;
+import java.io.*;
+import java.util.List;
+import java.util.ArrayList;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+/**
+ * @author Geovanie Ruiz
+ *
+ */
+public class SearchClient extends JPanel implements ActionListener {
+	private DefaultListModel listModel = new DefaultListModel();
+	private JList lineList = new JList(listModel);
+	private JScrollPane scrollPane = new JScrollPane();
+	scrollPane.setViewportView(lineList);
+	lineList.setLayoutOrientation(JList.VERTICAL);
+	private JTextField searchWord = new JTextField();
+	private JButton search = new JButton("Search");
+
+	/**
+	 * Default constructor
+	 * Build the GUI using a GridLayout to organize components
+	 */
+	public SearchClient() {
+		super(new GridLayout(3, 2));
+        
+        add(new JLabel("Word to search for:"));
+        add(searchWord);
+
+        add(new JLabel("Response:"));
+        add(lineList);
+
+        add(new JLabel());
+        // Add an event listener to the button to trigger code when it's clicked
+        search.addActionListener(this);
+        add(search);
+	}
+
+	private ArrayList<Integer> GetSearchResult(String keyword) {
+		ArrayList<Integer> serverResponse = new ArrayList<Integer>();
+
+		try {
+			Socket connection = new Socket("127.0.0.1", 1236);
+			
+			InputStream is = connection.getInputStream();
+			ObjectInputStream input = new ObjectInputStream(is);
+			OutputStream output = connection.getOutputStream();
+			
+			output.write(keyword.length());
+			output.write(keyword.getBytes());
+
+			try {
+				serverResponse = (ArrayList<Integer>)input.readObject();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			System.out.println(serverResponse);
+			
+			if(!connection.isClosed()) {
+				connection.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return serverResponse;
+	}
+	
+	/**
+	 * Update the text in the result label
+	 * 
+	 * @param value the value to display as the result
+	 */
+	private void UpdateResult(List<Integer> lines) {
+		for (Integer line : lines) {
+			listModel.addElement(line);
+		}
+	}
+
+	/**
+	 * Event triggered when button is clicked; collects data from components
+	 * to update result label
+	 * 
+	 * @param e contains information about the triggered ActionEvent
+	 */
+    public void actionPerformed(ActionEvent e) {
+        UpdateResult(GetSearchResult(searchWord.getText()));
+    }
+
+	/**
+	 * Create GUI container and drop an instance of the search client
+	 */
+	private static void constructGUI() {
+        // Create a new Frame to contain the client
+		JFrame.setDefaultLookAndFeelDecorated(true);
+        JFrame frame = new JFrame("Word Search");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+ 
+        // Create a content pane and add it to the frame
+        JComponent newContentPane = new SearchClient();
+        newContentPane.setOpaque(true); //content panes must be opaque
+        frame.setContentPane(newContentPane);
+ 
+        // Get frame size and determine the frame's screen position to put it in the center
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int frameWidth = 300;
+        int frameHeight = 150;
+        int screenWidth = (int) screenSize.getWidth();
+        int screenHeight = (int) screenSize.getHeight();
+        int midHorizPosition = (screenWidth / 2) - (frameWidth / 2);
+        int midVertPosition = (screenHeight / 2) - (frameHeight / 2);
+
+        // Set frame size, screen position, and show the calculator interface
+        frame.setBounds(midHorizPosition, midVertPosition, frameWidth, frameHeight);
+        frame.setVisible(true);
+    }
+
+	/**
+	 * Launch the Search GUI
+	 */
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				constructGUI();
+			}
+		});
+	}
+}
